@@ -163,6 +163,59 @@
             text-align: center;
             z-index: 5;
         }
+        
+        /* New styles for next prayer countdown */
+        #next-prayer-countdown {
+            width: 180px;
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        #next-prayer-label {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        #next-prayer-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        #next-prayer-time {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #4CFF4C;
+        }
+        
+        #countdown-timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF9800;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            width: 90%;
+            margin-top: 20px;
+        }
+        
+        #countdown-hours {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .countdown-label {
+            font-size: 16px;
+            color: #CCC;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +267,18 @@
                 <div id="countdown-message"></div>
             </div>
             
+            <!-- New countdown section on the right -->
+            <div id="next-prayer-countdown">
+                <div id="next-prayer-label">SOLAT SETERUSNYA</div>
+                <div id="next-prayer-name">-</div>
+                <div id="next-prayer-time">00:00 AM</div>
+                
+                <div id="countdown-timer">
+                    <div id="countdown-hours">00:00:00</div>
+                    <div class="countdown-label">JAM : MINIT : SAAT</div>
+                </div>
+            </div>
+            
             <div id="notification">
                 <div id="current-prayer">SEKARANG MASUK WAKTU SOLAT</div>
                 <div id="prayer-name">MAGHRIB</div>
@@ -234,6 +299,7 @@
         // Globals
         let prayerTimes = {};
         let currentPrayer = '';
+        let nextPrayer = '';
         let iqamahTimes = {
             'subuh': 15,    // minutes after adhan
             'zohor': 10,
@@ -254,6 +320,7 @@
             // Set intervals
             setInterval(updateClock, 1000);
             setInterval(checkPrayerTime, 30000);
+            setInterval(updateNextPrayerCountdown, 1000);
             
             // Initial check
             checkPrayerTime();
@@ -358,6 +425,7 @@
                         
                         // Update UI with fetched prayer times
                         updatePrayerTimesUI();
+                        findNextPrayer();
                     } else {
                         // Fallback to hardcoded times if API fails
                         useFallbackPrayerTimes();
@@ -394,6 +462,7 @@
             };
             
             updatePrayerTimesUI();
+            findNextPrayer();
         }
 
         // Check if it's prayer time
@@ -422,6 +491,94 @@
                 if (currentTime > notificationTimeStr) {
                     hideNotification();
                 }
+            }
+            
+            // Find next prayer time
+            findNextPrayer();
+        }
+
+        // Find the next prayer time
+        function findNextPrayer() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes since midnight
+            
+            // Prayer times to check (exclude imsak)
+            const prayersToCheck = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+            let nextPrayerTime = 24 * 60; // Default to end of day
+            let nextPrayerName = 'subuh'; // Default to Subuh (for next day)
+            
+            prayersToCheck.forEach(prayer => {
+                if (prayerTimes[prayer]) {
+                    const [hours, minutes] = prayerTimes[prayer].split(':').map(Number);
+                    const prayerTimeInMinutes = hours * 60 + minutes;
+                    
+                    if (prayerTimeInMinutes > currentTime && prayerTimeInMinutes < nextPrayerTime) {
+                        nextPrayerTime = prayerTimeInMinutes;
+                        nextPrayerName = prayer;
+                    }
+                }
+            });
+            
+            // Update global next prayer
+            nextPrayer = nextPrayerName;
+            
+            // Update UI
+            updateNextPrayerUI(nextPrayerName);
+        }
+        
+        // Update next prayer UI
+        function updateNextPrayerUI(prayer) {
+            // Set prayer name in proper Malay
+            let prayerNameMalay = prayer;
+            switch(prayer) {
+                case 'subuh': prayerNameMalay = 'SUBUH'; break;
+                case 'syuruk': prayerNameMalay = 'SYURUK'; break;
+                case 'zohor': prayerNameMalay = 'ZOHOR'; break;
+                case 'asar': prayerNameMalay = 'ASAR'; break;
+                case 'maghrib': prayerNameMalay = 'MAGHRIB'; break;
+                case 'isyak': prayerNameMalay = 'ISYAK'; break;
+            }
+            
+            document.getElementById('next-prayer-name').innerText = prayerNameMalay;
+            document.getElementById('next-prayer-time').innerText = convertTo12Hour(prayerTimes[prayer]);
+        }
+        
+        // Update countdown to next prayer
+        function updateNextPrayerCountdown() {
+            if (!nextPrayer || !prayerTimes[nextPrayer]) return;
+            
+            const now = new Date();
+            const [hours, minutes] = prayerTimes[nextPrayer].split(':').map(Number);
+            
+            // Create date object for next prayer time
+            const nextPrayerDate = new Date(now);
+            nextPrayerDate.setHours(hours);
+            nextPrayerDate.setMinutes(minutes);
+            nextPrayerDate.setSeconds(0);
+            
+            // If next prayer is tomorrow (we've passed all prayers for today)
+            if (nextPrayerDate < now) {
+                nextPrayerDate.setDate(nextPrayerDate.getDate() + 1);
+            }
+            
+            // Calculate time difference
+            const diffInMilliseconds = nextPrayerDate - now;
+            
+            if (diffInMilliseconds > 0) {
+                // Convert to hours, minutes, seconds
+                const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+                const hrs = Math.floor(diffInSeconds / 3600);
+                const mins = Math.floor((diffInSeconds % 3600) / 60);
+                const secs = diffInSeconds % 60;
+                
+                // Format with leading zeros
+                const formattedHours = hrs.toString().padStart(2, '0');
+                const formattedMins = mins.toString().padStart(2, '0');
+                const formattedSecs = secs.toString().padStart(2, '0');
+                
+                // Update countdown display
+                document.getElementById('countdown-hours').innerText = 
+                    `${formattedHours}:${formattedMins}:${formattedSecs}`;
             }
         }
 
@@ -459,6 +616,9 @@
             
             document.getElementById('iqamah-time').innerText = iqamahTime;
             document.getElementById('notification').classList.add('active');
+            
+            // After notification, find the next prayer
+            findNextPrayer();
         }
 
         // Hide notification
