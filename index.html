@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Paparan Masjid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+            overflow: hidden;
+            background-color: black;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #header {
+            background-color: #222;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #date-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 20px; /* Increased font size */
+        }
+        
+        #mosque-name {
+            text-align: center;
+            flex-grow: 1;
+            font-size: 24px; /* Slightly increased */
+        }
+        
+        #clock {
+            font-size: 32px; /* Increased font size */
+            font-weight: bold;
+        }
+        
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
+        }
+        
+        /* Vertical prayer times container */
+        #prayer-times-vertical {
+            width: 150px; /* Width of the vertical prayer times */
+            display: flex;
+            flex-direction: column;
+            background-color: #333;
+        }
+        
+        .prayer-time {
+            text-align: center;
+            padding: 8px 5px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        
+        #slides-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: black;
+        }
+        
+        #slides {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        #imsak { background-color: #8B0000; }
+        #subuh { background-color: #4B0082; }
+        #syuruk { background-color: #0000CD; }
+        #zohor { background-color: #006400; }
+        #asar { background-color: #DAA520; }
+        #maghrib { background-color: #800080; }
+        #isyak { background-color: #8B4513; }
+        
+        #notification {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        #notification.active {
+            display: flex;
+        }
+        
+        #current-prayer {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #4CFF4C; /* Bright green color as shown in the image */
+        }
+        
+        #prayer-name {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 30px 0;
+            color: white;
+        }
+        
+        #iqamah {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 60%;
+        }
+        
+        #iqamah-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        #iqamah-time {
+            font-size: 72px;
+            font-weight: bold;
+            letter-spacing: 5px;
+        }
+        
+        #reminder {
+            margin-top: 20px;
+            font-size: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+        
+        #footer {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        #countdown-message {
+            color: #FF9800;
+            font-weight: bold;
+            padding: 5px 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 5;
+        }
+        
+        /* New styles for next prayer countdown */
+        #next-prayer-countdown {
+            width: 180px;
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        #next-prayer-label {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        #next-prayer-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        #next-prayer-time {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #4CFF4C;
+        }
+        
+        #countdown-timer {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF9800;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            width: 90%;
+            margin-top: 20px;
+        }
+        
+        #countdown-hours {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .countdown-label {
+            font-size: 16px;
+            color: #CCC;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <div id="date-info">
+                <span id="hijri-date"></span>
+                <span id="gregorian-date"></span>
+            </div>
+            <div id="mosque-name">MASJID TENGKU SARAFUDIN, KUALA NERANG, KEDAH DARULAMAN</div>
+            <div id="clock">00:00:00 AM</div>
+        </div>
+        
+        <div id="main-content">
+            <!-- Vertical prayer times on the left -->
+            <div id="prayer-times-vertical">
+                <div class="prayer-time" id="imsak">
+                    <div>Imsak</div>
+                    <div id="imsak-time">05:35 AM</div>
+                </div>
+                <div class="prayer-time" id="subuh">
+                    <div>Subuh</div>
+                    <div id="subuh-time">05:45 AM</div>
+                </div>
+                <div class="prayer-time" id="syuruk">
+                    <div>Syuruk</div>
+                    <div id="syuruk-time">07:05 AM</div>
+                </div>
+                <div class="prayer-time" id="zohor">
+                    <div>Zohor</div>
+                    <div id="zohor-time">01:15 PM</div>
+                </div>
+                <div class="prayer-time" id="asar">
+                    <div>Asar</div>
+                    <div id="asar-time">04:30 PM</div>
+                </div>
+                <div class="prayer-time" id="maghrib">
+                    <div>Maghrib</div>
+                    <div id="maghrib-time">07:26 PM</div>
+                </div>
+                <div class="prayer-time" id="isyak">
+                    <div>Isyak</div>
+                    <div id="isyak-time">08:40 PM</div>
+                </div>
+            </div>
+            
+            <div id="slides-container">
+                <iframe id="slides" src="https://docs.google.com/presentation/d/e/2PACX-1vSpfi536tQThnbiYcufW0LqUF7Q5k21v-t9NK7mMLmwBpWrIEU3jWy83qkXmGylR91HrhuCthMJfLXF/pubembed?start=true&loop=true&delayms=10000" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                <div id="countdown-message"></div>
+            </div>
+            
+            <!-- New countdown section on the right -->
+            <div id="next-prayer-countdown">
+                <div id="next-prayer-label">SOLAT SETERUSNYA</div>
+                <div id="next-prayer-name">-</div>
+                <div id="next-prayer-time">00:00 AM</div>
+                
+                <div id="countdown-timer">
+                    <div id="countdown-hours">00:00:00</div>
+                    <div class="countdown-label">JAM : MINIT : SAAT</div>
+                </div>
+            </div>
+            
+            <div id="notification">
+                <div id="current-prayer">SEKARANG MASUK WAKTU SOLAT</div>
+                <div id="prayer-name">MAGHRIB</div>
+                <div id="iqamah">
+                    <div id="iqamah-title">IQAMAH MAGHRIB</div>
+                    <div id="iqamah-time">07:31 PM</div>
+                </div>
+                <div id="reminder">Matikan/silent telefon bimbit anda</div>
+            </div>
+        </div>
+        
+        <div id="footer">
+            MOHON SUPAYA TELEFON BIMBIT DI"OFF"KAN SEMASA SOLAT SEDANG BERLANGSUNG
+        </div>
+    </div>
+
+    <script>
+        // Globals
+        let prayerTimes = {};
+        let currentPrayer = '';
+        let nextPrayer = '';
+        let iqamahTimes = {
+            'subuh': 15,    // minutes after adhan
+            'zohor': 10,
+            'asar': 10,
+            'maghrib': 5,
+            'isyak': 10
+        };
+        let showingNotification = false;
+        let notificationTimer = null;
+        let eidCountdown = false;
+        let eidDate = new Date('2025-04-30'); // Example date for Eid
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            updateDates();
+            fetchPrayerTimes();
+            
+            // Set intervals
+            setInterval(updateClock, 1000);
+            setInterval(checkPrayerTime, 10000); // Check every 10 seconds to be more precise
+            setInterval(updateNextPrayerCountdown, 1000);
+            
+            // Initial check
+            checkPrayerTime();
+            setEidCountdown();
+        });
+        
+        // Convert 24-hour format to 12-hour format with AM/PM
+        function convertTo12Hour(time24h) {
+            // Check if it's already in 12-hour format or has AM/PM
+            if (time24h.includes('AM') || time24h.includes('PM')) {
+                return time24h;
+            }
+            
+            const [hours, minutes] = time24h.split(':');
+            const hoursNum = parseInt(hours, 10);
+            
+            if (hoursNum === 0) {
+                return `12:${minutes} AM`;
+            } else if (hoursNum < 12) {
+                return `${hoursNum}:${minutes} AM`;
+            } else if (hoursNum === 12) {
+                return `12:${minutes} PM`;
+            } else {
+                return `${hoursNum - 12}:${minutes} PM`;
+            }
+        }
+
+        // Update clock with 12-hour format
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours.toString().padStart(2, '0');
+            
+            document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
+        }
+
+        // Update dates (Gregorian and Hijri)
+        function updateDates() {
+            const now = new Date();
+            
+            // Gregorian date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const gregorianDate = now.toLocaleDateString('ms-MY', options);
+            document.getElementById('gregorian-date').innerText = gregorianDate;
+            
+            // For Hijri date, we'll use a more accurate calculation
+            fetchHijriDate();
+        }
+
+        // Fetch Hijri date from API
+        function fetchHijriDate() {
+            const apiUrl = 'https://api.aladhan.com/v1/gToH';
+            const now = new Date();
+            const formattedDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+            
+            fetch(`${apiUrl}?date=${formattedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const hijri = data.data.hijri;
+                        const hijriDate = `${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                        document.getElementById('hijri-date').innerText = hijriDate;
+                    } else {
+                        // Fallback if API fails
+                        document.getElementById('hijri-date').innerText = "28 Shawwal 1446";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Hijri date:', error);
+                    // Fallback
+                    document.getElementById('hijri-date').innerText = "28 Shawwal 1446";
+                });
+        }
+
+        // Fetch prayer times from JAKIM API
+        function fetchPrayerTimes() {
+            // Use the JAKIM API endpoint for Kota Setar, Kedah (KDH01)
+            const jakim_api_url = 'https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=KDH01';
+            
+            fetch(jakim_api_url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.prayerTime && data.prayerTime.length > 0) {
+                        // Extract times from JAKIM response
+                        const times = data.prayerTime[0];
+                        
+                        prayerTimes = {
+                            'imsak': times.imsak,
+                            'subuh': times.fajr,
+                            'syuruk': times.syuruk,
+                            'zohor': times.dhuhr,
+                            'asar': times.asr,
+                            'maghrib': times.maghrib,
+                            'isyak': times.isha
+                        };
+                        
+                        // Update UI with fetched prayer times
+                        updatePrayerTimesUI();
+                        findNextPrayer();
+                    } else {
+                        // Fallback to hardcoded times if API fails
+                        useFallbackPrayerTimes();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching prayer times:', error);
+                    // Use fallback times if fetch fails
+                    useFallbackPrayerTimes();
+                });
+        }
+        
+        // Update prayer times in UI with 12-hour format
+        function updatePrayerTimesUI() {
+            document.getElementById('imsak-time').innerText = convertTo12Hour(prayerTimes.imsak);
+            document.getElementById('subuh-time').innerText = convertTo12Hour(prayerTimes.subuh);
+            document.getElementById('syuruk-time').innerText = convertTo12Hour(prayerTimes.syuruk);
+            document.getElementById('zohor-time').innerText = convertTo12Hour(prayerTimes.zohor);
+            document.getElementById('asar-time').innerText = convertTo12Hour(prayerTimes.asar);
+            document.getElementById('maghrib-time').innerText = convertTo12Hour(prayerTimes.maghrib);
+            document.getElementById('isyak-time').innerText = convertTo12Hour(prayerTimes.isyak);
+        }
+        
+        // Fallback prayer times if API fails
+        function useFallbackPrayerTimes() {
+            prayerTimes = {
+                'imsak': '05:35',
+                'subuh': '05:45',
+                'syuruk': '07:05',
+                'zohor': '13:15',
+                'asar': '16:30',
+                'maghrib': '19:26',
+                'isyak': '20:40'
+            };
+            
+            updatePrayerTimesUI();
+            findNextPrayer();
+        }
+
+        // Check if it's prayer time - improved with more precise timing
+        function checkPrayerTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // Check each prayer time
+            const prayersToCheck = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
+            
+            for (const prayer of prayersToCheck) {
+                if (prayerTimes[prayer]) {
+                    const [hours, minutes] = prayerTimes[prayer].split(':').map(Number);
+                    
+                    // Check if current time matches prayer time
+                    if (currentHour === hours && currentMinute === minutes) {
+                        showPrayerNotification(prayer);
+                        return;
+                    }
+                }
+            }
+            
+            // Find next prayer time (even if notification is showing)
+            findNextPrayer();
+        }
+
+        // Find the next prayer time
+        function findNextPrayer() {
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes since midnight
+            
+            // Prayer times to check (exclude imsak and syuruk)
+            const prayersToCheck = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
+            let nextPrayerTime = 24 * 60; // Default to end of day
+            let nextPrayerName = 'subuh'; // Default to Subuh (for next day)
+            
+            prayersToCheck.forEach(prayer => {
+                if (prayerTimes[prayer]) {
+                    const [hours, minutes] = prayerTimes[prayer].split(':').map(Number);
+                    const prayerTimeInMinutes = hours * 60 + minutes;
+                    
+                    if (prayerTimeInMinutes > currentTime && prayerTimeInMinutes < nextPrayerTime) {
+                        nextPrayerTime = prayerTimeInMinutes;
+                        nextPrayerName = prayer;
+                    }
+                }
+            });
+            
+            // Update global next prayer
+            nextPrayer = nextPrayerName;
+            
+            // Update UI
+            updateNextPrayerUI(nextPrayerName);
+        }
+        
+        // Update next prayer UI
+        function updateNextPrayerUI(prayer) {
+            // Set prayer name in proper Malay
+            let prayerNameMalay = prayer;
+            switch(prayer) {
+                case 'subuh': prayerNameMalay = 'SUBUH'; break;
+                case 'syuruk': prayerNameMalay = 'SYURUK'; break;
+                case 'zohor': prayerNameMalay = 'ZOHOR'; break;
+                case 'asar': prayerNameMalay = 'ASAR'; break;
+                case 'maghrib': prayerNameMalay = 'MAGHRIB'; break;
+                case 'isyak': prayerNameMalay = 'ISYAK'; break;
+            }
+            
+            document.getElementById('next-prayer-name').innerText = prayerNameMalay;
+            document.getElementById('next-prayer-time').innerText = convertTo12Hour(prayerTimes[prayer]);
+        }
+        
+        // Update countdown to next prayer
+        function updateNextPrayerCountdown() {
+            if (!nextPrayer || !prayerTimes[nextPrayer]) return;
+            
+            const now = new Date();
+            const [hours, minutes] = prayerTimes[nextPrayer].split(':').map(Number);
+            
+            // Create date object for next prayer time
+            const nextPrayerDate = new Date(now);
+            nextPrayerDate.setHours(hours);
+            nextPrayerDate.setMinutes(minutes);
+            nextPrayerDate.setSeconds(0);
+            
+            // If next prayer is tomorrow (we've passed all prayers for today)
+            if (nextPrayerDate < now) {
+                nextPrayerDate.setDate(nextPrayerDate.getDate() + 1);
+            }
+            
+            // Calculate time difference
+            const diffInMilliseconds = nextPrayerDate - now;
+            
+            if (diffInMilliseconds > 0) {
+                // Convert to hours, minutes, seconds
+                const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+                const hrs = Math.floor(diffInSeconds / 3600);
+                const mins = Math.floor((diffInSeconds % 3600) / 60);
+                const secs = diffInSeconds % 60;
+                
+                // Format with leading zeros
+                const formattedHours = hrs.toString().padStart(2, '0');
+                const formattedMins = mins.toString().padStart(2, '0');
+                const formattedSecs = secs.toString().padStart(2, '0');
+                
+                // Update countdown display
+                document.getElementById('countdown-hours').innerText = 
+                    `${formattedHours}:${formattedMins}:${formattedSecs}`;
+            }
+        }
+
+        // Show prayer notification
+        function showPrayerNotification(prayer) {
+            // Skip prayers that don't require notifications
+            if (prayer === 'imsak' || prayer === 'syuruk') return;
+            
+            currentPrayer = prayer;
+            showingNotification = true;
+            
+            // Set prayer name in proper Malay
+            let prayerNameMalay = prayer;
+            switch(prayer) {
+                case 'subuh': prayerNameMalay = 'SUBUH'; break;
+                case 'zohor': prayerNameMalay = 'ZOHOR'; break;
+                case 'asar': prayerNameMalay = 'ASAR'; break;
+                case 'maghrib': prayerNameMalay = 'MAGHRIB'; break;
+                case 'isyak': prayerNameMalay = 'ISYAK'; break;
+            }
+            
+            document.getElementById('prayer-name').innerText = prayerNameMalay;
+            document.getElementById('iqamah-title').innerText = `IQAMAH ${prayerNameMalay}`;
+            
+            // Calculate iqamah time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + iqamahTimes[prayer]);
+            
+            // Convert to 12-hour format
+            let hours = now.getHours();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            
+            const iqamahTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${ampm}`;
+            
+            document.getElementById('iqamah-time').innerText = iqamahTime;
+            document.getElementById('notification').classList.add('active');
+            
+            // Set a timer to hide the notification after 5 minutes (300000 ms)
+            if (notificationTimer) {
+                clearTimeout(notificationTimer);
+            }
+            
+            notificationTimer = setTimeout(() => {
+                hideNotification();
+            }, 300000); // 5 minutes
+            
+            // After notification, find the next prayer
+            findNextPrayer();
+        }
+
+        // Hide notification
+        function hideNotification() {
+            showingNotification = false;
+            document.getElementById('notification').classList.remove('active');
+            
+            if (notificationTimer) {
+                clearTimeout(notificationTimer);
+                notificationTimer = null;
+            }
+        }
+        
+        // Set Eid countdown
+        function setEidCountdown() {
+            const now = new Date();
+            const daysUntilEid = Math.ceil((eidDate - now) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilEid > 0) {
+                eidCountdown = true;
+                document.getElementById('countdown-message').innerText = `  `; // Empty message as requested
+            }
+        }
+    </script>
+</body>
+</html>
