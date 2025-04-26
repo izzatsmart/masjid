@@ -3,533 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Masjid - Kota Setar</title>
+    <title>Sistem Paparan Masjid</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #004c3f;
             color: white;
             overflow: hidden;
+            background-color: black;
         }
-        .container {
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
         }
-        .header {
-            background-color: #00392f;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 2px solid gold;
-        }
-        .main-content {
-            display: flex;
-            flex: 1;
-        }
-        .prayer-times {
-            width: 30%;
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-right: 2px solid gold;
-        }
-        .prayer-times h2 {
-            text-align: center;
-            color: gold;
-            margin-bottom: 20px;
-        }
-        .prayer-item {
+        
+        #header {
+            background-color: #222;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 8px;
-            border-radius: 5px;
+            align-items: center;
         }
-        .prayer-item.active {
-            background-color: rgba(255, 215, 0, 0.3);
-            border-left: 5px solid gold;
-        }
-        .slides-area {
-            flex: 1;
+        
+        #date-info {
             display: flex;
             flex-direction: column;
+            font-size: 20px; /* Increased font size */
         }
-        .date-display {
+        
+        #mosque-name {
             text-align: center;
-            margin: 15px;
-            font-size: 1.2em;
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
+            flex-grow: 1;
+            font-size: 28px; /* Slightly increased */
         }
-        .hijri-date {
-            color: gold;
+        
+        #clock {
+            font-size: 32px; /* Increased font size */
             font-weight: bold;
         }
-        .google-slides-container {
-            flex: 1;
-            padding: 0 15px 15px 15px;
+        
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
         }
-        .google-slides {
+        
+        /* Vertical prayer times container */
+        #prayer-times-vertical {
+            width: 150px; /* Width of the vertical prayer times */
+            display: flex;
+            flex-direction: column;
+            background-color: #333;
+        }
+        
+        .prayer-time {
+            text-align: center;
+            padding: 8px 5px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        
+        #slides-container {
+            flex-grow: 1;
+            position: relative;
+            background-color: black;
+        }
+        
+        #slides {
             width: 100%;
             height: 100%;
             border: none;
-            border-radius: 10px;
         }
-        .countdown-container {
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            border: 1px solid gold;
-        }
-        .countdown-timer {
-            font-size: 2.5em;
-            color: gold;
-            font-weight: bold;
-        }
-        .countdown-label {
-            font-size: 1.2em;
-        }
-        .footer {
-            background-color: #00392f;
-            padding: 10px;
-            border-top: 2px solid gold;
-            position: relative;
-            overflow: hidden;
-            height: 40px;
-        }
-        .ticker {
+        
+        #imsak { background-color: #8B0000; }
+        #subuh { background-color: #4B0082; }
+        #syuruk { background-color: #0000CD; }
+        #zohor { background-color: #006400; }
+        #asar { background-color: #DAA520; }
+        #maghrib { background-color: #800080; }
+        #isyak { background-color: #8B4513; }
+        
+        #notification {
             position: absolute;
-            white-space: nowrap;
-            animation: ticker-move 30s linear infinite;
-            font-size: 1.2em;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
-        @keyframes ticker-move {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        
+        #notification.active {
+            display: flex;
         }
-        .clock {
-            font-size: 2em;
+        
+        #current-prayer {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #4CFF4C;
+        }
+        
+        #prayer-name {
+            font-size: 72px;
             font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
+            margin: 30px 0;
+            color: white;
         }
-        .location-info {
-            text-align: center;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            color: #ccc;
-        }
-        .loading {
-            text-align: center;
+        
+        #iqamah {
+            background-color: rgba(255, 255, 255, 0.1);
             padding: 20px;
-            font-style: italic;
-            color: #ccc;
+            border-radius: 10px;
+            text-align: center;
+            width: 60%;
+        }
+        
+        #iqamah-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        #iqamah-time {
+            font-size: 72px;
+            font-weight: bold;
+            letter-spacing: 5px;
+        }
+        
+        #reminder {
+            margin-top: 20px;
+            font-size: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+        
+        #footer {
+            background-color: #222;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        #countdown-message {
+            color: #FF9800;
+            font-weight: bold;
+            padding: 5px 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 5;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>MASJID AL-HIDAYAH</h1>
+    <div id="container">
+        <div id="header">
+            <div id="date-info">
+                <span id="hijri-date"></span>
+                <span id="gregorian-date"></span>
+            </div>
+            <div id="mosque-name">MASJID TENGKU SARAFUDIN, KUALA NERANG, KEDAH DARULAMAN</div>
+            <div id="clock">00:00:00 AM</div>
         </div>
         
-        <div class="main-content">
-            <div class="prayer-times">
-                <h2>WAKTU SOLAT HARI INI</h2>
-                <div class="clock" id="current-time">00:00:00</div>
-                <div class="location-info">Kedah - Kota Setar (KDH01)</div>
-                
-                <div id="prayer-times-container">
-                    <div class="loading">Memuat waktu solat...</div>
+        <div id="main-content">
+            <!-- Vertical prayer times on the left -->
+            <div id="prayer-times-vertical">
+                <div class="prayer-time" id="imsak">
+                    <div>Imsak</div>
+                    <div id="imsak-time">05:35 AM</div>
                 </div>
-                
-                <div class="countdown-container">
-                    <div class="countdown-label">MENUJU WAKTU SOLAT</div>
-                    <div class="countdown-timer" id="countdown">--:--:--</div>
-                    <div id="next-prayer">--</div>
+                <div class="prayer-time" id="subuh">
+                    <div>Subuh</div>
+                    <div id="subuh-time">05:45 AM</div>
+                </div>
+                <div class="prayer-time" id="syuruk">
+                    <div>Syuruk</div>
+                    <div id="syuruk-time">07:05 AM</div>
+                </div>
+                <div class="prayer-time" id="zohor">
+                    <div>Zohor</div>
+                    <div id="zohor-time">01:15 PM</div>
+                </div>
+                <div class="prayer-time" id="asar">
+                    <div>Asar</div>
+                    <div id="asar-time">04:30 PM</div>
+                </div>
+                <div class="prayer-time" id="maghrib">
+                    <div>Maghrib</div>
+                    <div id="maghrib-time">07:26 PM</div>
+                </div>
+                <div class="prayer-time" id="isyak">
+                    <div>Isyak</div>
+                    <div id="isyak-time">08:40 PM</div>
                 </div>
             </div>
             
-            <div class="slides-area">
-                <div class="date-display">
-                    <span id="gregorian-date">Memuat tarikh...</span>
-                    <br>
-                    <span class="hijri-date" id="hijri-date">Memuat tarikh Hijrah...</span>
+            <div id="slides-container">
+                <iframe id="slides" src="https://docs.google.com/presentation/d/e/2PACX-1vSpfi536tQThnbiYcufW0LqUF7Q5k21v-t9NK7mMLmwBpWrIEU3jWy83qkXmGylR91HrhuCthMJfLXF/pubembed?start=true&loop=true&delayms=10000" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+                <div id="countdown-message"></div>
+            </div>
+            
+            <div id="notification">
+                <div id="current-prayer">SEKARANG MASUK WAKTU SOLAT</div>
+                <div id="prayer-name">MAGHRIB</div>
+                <div id="iqamah">
+                    <div id="iqamah-title">IQAMAH MAGHRIB</div>
+                    <div id="iqamah-time">07:31 PM</div>
                 </div>
-                
-                <div class="google-slides-container">
-                    <iframe class="google-slides" src="https://docs.google.com/presentation/d/e/2PACX-1vSpfi536tQThnbiYcufW0LqUF7Q5k21v-t9NK7mMLmwBpWrIEU3jWy83qkXmGylR91HrhuCthMJfLXF/embed?start=true&loop=true&delayms=3000" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
-                </div>
+                <div id="reminder">Matikan/silent telefon bimbit anda</div>
             </div>
         </div>
         
-        <div class="footer">
-            <div class="ticker" id="ticker">
-                Masjid Al-Hidayah mengalu-alukan sumbangan untuk tabung masjid. Sila hubungi pentadbiran masjid di 012-3456789 untuk maklumat lanjut. Jemaah diingatkan untuk mematikan telefon bimbit semasa berada di dalam masjid.
-            </div>
+        <div id="footer">
+            MOHON SUPAYA TELEFON BIMBIT DI"OFF"KAN SEMASA SOLAT SEDANG BERLANGSUNG
         </div>
     </div>
 
     <script>
-        // Objek untuk menyimpan waktu solat
+        // Globals
         let prayerTimes = {};
+        let currentPrayer = '';
+        let iqamahTimes = {
+            'subuh': 15,    // minutes after adhan
+            'zohor': 10,
+            'asar': 10,
+            'maghrib': 5,
+            'isyak': 10
+        };
+        let showingNotification = false;
+        let eidCountdown = false;
+        let eidDate = new Date('2025-04-30'); // Example date for Eid
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            updateDates();
+            fetchPrayerTimes();
+            
+            // Set intervals
+            setInterval(updateClock, 1000);
+            setInterval(checkPrayerTime, 30000);
+            
+            // Initial check
+            checkPrayerTime();
+            setEidCountdown();
+        });
         
-        // Fungsi untuk menukar format waktu 24 jam ke objek jam dan minit
-        function parseTime(timeStr) {
-            const [hour, minute] = timeStr.split(':').map(num => parseInt(num));
-            return { hour, minute };
-        }
-        
-        // Fungsi untuk mengambil data waktu solat dari API JAKIM
-        async function fetchPrayerTimes() {
-            try {
-                // Dapatkan tarikh hari ini
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                
-                // URL API JAKIM untuk Kota Setar (KDH01)
-                // Kaedah 1: Menggunakan API JAKIM secara langsung (mungkin ada isu CORS)
-                const apiUrl = `https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=KDH01`;
-                
-                try {
-                    // Cuba dapatkan data dari JAKIM API
-                    const response = await fetch(apiUrl);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        // Jika berjaya, proses data dari JAKIM
-                        if (data && data.prayerTime && data.prayerTime.length > 0) {
-                            const prayerData = data.prayerTime[0];
-                            
-                            // Parse waktu solat mengikut format JAKIM
-                            prayerTimes = {
-                                subuh: parseTime(prayerData.fajr),
-                                syuruk: parseTime(prayerData.syuruk),
-                                zohor: parseTime(prayerData.dhuhr),
-                                asar: parseTime(prayerData.asr),
-                                maghrib: parseTime(prayerData.maghrib),
-                                isyak: parseTime(prayerData.isha)
-                            };
-                            
-                            // Set tarikh Hijrah jika ada
-                            if (prayerData.hijri) {
-                                document.getElementById('hijri-date').textContent = prayerData.hijri;
-                            } else {
-                                // Gunakan fungsi anggaran jika tiada data
-                                calcHijriDate();
-                            }
-                            
-                            console.log("Waktu solat berjaya diambil dari API JAKIM");
-                        } else {
-                            throw new Error("Format data JAKIM tidak seperti yang dijangka");
-                        }
-                    } else {
-                        throw new Error("Gagal mengakses API JAKIM");
-                    }
-                } catch (apiError) {
-                    console.error("Error akses API JAKIM:", apiError);
-                    console.log("Mencuba kaedah alternatif...");
-                    
-                    // Kaedah 2: Menggunakan API mpt.i906.my yang menyediakan data JAKIM 
-                    // API alternatif ini menyelesaikan masalah CORS
-                    const altApiUrl = `https://mpt.i906.my/api/prayer/${year}/${month}/${day}/kdh01.json`;
-                    
-                    try {
-                        const altResponse = await fetch(altApiUrl);
-                        
-                        if (altResponse.ok) {
-                            const altData = await altResponse.json();
-                            
-                            // Parse data dari API alternatif
-                            if (altData && altData.data && altData.data.times) {
-                                const times = altData.data.times;
-                                
-                                prayerTimes = {
-                                    subuh: parseTime(times[0]),    // Subuh
-                                    syuruk: parseTime(times[1]),   // Syuruk
-                                    zohor: parseTime(times[2]),    // Zohor
-                                    asar: parseTime(times[3]),     // Asar
-                                    maghrib: parseTime(times[4]),  // Maghrib
-                                    isyak: parseTime(times[5])     // Isyak
-                                };
-                                
-                                // Set tarikh Hijrah
-                                if (altData.data.hijri) {
-                                    document.getElementById('hijri-date').textContent = altData.data.hijri;
-                                } else {
-                                    calcHijriDate();
-                                }
-                                
-                                console.log("Waktu solat berjaya diambil dari API alternatif");
-                            } else {
-                                throw new Error("Format data API alternatif tidak seperti yang dijangka");
-                            }
-                        } else {
-                            throw new Error("Kedua-dua API gagal diakses");
-                        }
-                    } catch (altApiError) {
-                        console.error("Error akses API alternatif:", altApiError);
-                        throw new Error("Semua API gagal diakses");
-                    }
-                }
-            } catch (error) {
-                console.error('Error mendapatkan waktu solat:', error);
-                
-                // Gunakan waktu solat statik untuk Kota Setar jika kedua-dua API gagal
-                useFallbackPrayerTimes();
-                
-                // Kira tarikh Hijrah secara anggaran
-                calcHijriDate();
-            } finally {
-                // Render waktu solat ke UI
-                renderPrayerTimes();
-                
-                // Kemaskini countdown dan highlight
-                updateClock();
+        // Convert 24-hour format to 12-hour format with AM/PM
+        function convertTo12Hour(time24h) {
+            // Check if it's already in 12-hour format or has AM/PM
+            if (time24h.includes('AM') || time24h.includes('PM')) {
+                return time24h;
+            }
+            
+            const [hours, minutes] = time24h.split(':');
+            const hoursNum = parseInt(hours, 10);
+            
+            if (hoursNum === 0) {
+                return `12:${minutes} AM`;
+            } else if (hoursNum < 12) {
+                return `${hoursNum}:${minutes} AM`;
+            } else if (hoursNum === 12) {
+                return `12:${minutes} PM`;
+            } else {
+                return `${hoursNum - 12}:${minutes} PM`;
             }
         }
-        
-        // Gunakan waktu solat statik jika API gagal
-        function useFallbackPrayerTimes() {
-            // Waktu solat statik untuk Kota Setar, Kedah (KDH01)
-            // Nota: Ini adalah anggaran sahaja dan mungkin tidak tepat
-            prayerTimes = {
-                subuh: { hour: 5, minute: 47 },
-                syuruk: { hour: 7, minute: 7 },
-                zohor: { hour: 13, minute: 15 },
-                asar: { hour: 16, minute: 37 },
-                maghrib: { hour: 19, minute: 20 },
-                isyak: { hour: 20, minute: 32 }
-            };
-            
-            // Tambah notifikasi bahawa ini adalah waktu anggaran
-            document.querySelector('.location-info').textContent = 'Kedah - Kota Setar (KDH01) [Anggaran]';
-            console.log("Menggunakan waktu solat anggaran untuk Kota Setar");
-        }
-        
-        // Fungsi untuk memaparkan waktu solat ke dalam UI
-        function renderPrayerTimes() {
-            const container = document.getElementById('prayer-times-container');
-            container.innerHTML = '';
-            
-            const prayers = [
-                { id: 'subuh', name: 'Subuh', time: prayerTimes.subuh },
-                { id: 'syuruk', name: 'Syuruk', time: prayerTimes.syuruk },
-                { id: 'zohor', name: 'Zohor', time: prayerTimes.zohor },
-                { id: 'asar', name: 'Asar', time: prayerTimes.asar },
-                { id: 'maghrib', name: 'Maghrib', time: prayerTimes.maghrib },
-                { id: 'isyak', name: 'Isyak', time: prayerTimes.isyak }
-            ];
-            
-            prayers.forEach(prayer => {
-                const prayerElement = document.createElement('div');
-                prayerElement.id = prayer.id;
-                prayerElement.className = 'prayer-item';
-                
-                const formattedTime = `${String(prayer.time.hour).padStart(2, '0')}:${String(prayer.time.minute).padStart(2, '0')}`;
-                
-                prayerElement.innerHTML = `
-                    <span>${prayer.name}</span>
-                    <span>${formattedTime}</span>
-                `;
-                
-                container.appendChild(prayerElement);
-            });
-        }
-        
-        // Fungsi untuk mengira tarikh Hijrah secara anggaran
-        function calcHijriDate() {
-            const today = new Date();
-            
-            // Formula anggaran mudah untuk menukar tarikh Gregorian ke Hijrah
-            // Nota: Ini tidak tepat dan hanya perkiraan kasar
-            const gregorianYear = today.getFullYear();
-            const gregorianMonth = today.getMonth() + 1;
-            const gregorianDate = today.getDate();
-            
-            // Anggaran tahun Hijrah (formula kasar: 622 tahun perbezaan)
-            let hijriYear = gregorianYear - 622;
-            
-            // Nama-nama bulan Hijrah dalam Bahasa Melayu
-            const hijriMonths = [
-                "Muharram", "Safar", "Rabiulawal", "Rabiulakhir", 
-                "Jamadilawal", "Jamadilakhir", "Rejab", "Syaaban", 
-                "Ramadhan", "Syawal", "Zulkaedah", "Zulhijjah"
-            ];
-            
-            // Anggaran bulan Hijrah (offset +10 bulan dari Gregorian secara kasar)
-            let hijriMonthIndex = (gregorianMonth + 10) % 12;
-            if (hijriMonthIndex === 0) hijriMonthIndex = 12;
-            
-            // Anggaran hari dengan offset (+/-2 hari, bergantung pada bulan)
-            let hijriDate = gregorianDate + 2;
-            if (hijriDate > 30) hijriDate = hijriDate - 30;
-            
-            // Set tarikh Hijrah dalam format yang sesuai
-            document.getElementById('hijri-date').textContent = 
-                `${hijriDate} ${hijriMonths[hijriMonthIndex-1]} ${hijriYear}H`;
-        }
 
-        // Fungsi untuk mengemaskini jam
+        // Update clock with 12-hour format
         function updateClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+            let hours = now.getHours();
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
             
-            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours.toString().padStart(2, '0');
             
-            // Update tarikh Gregorian
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('gregorian-date').textContent = now.toLocaleDateString('ms-MY', options);
-            
-            updatePrayerHighlight(now);
-            updateCountdown(now);
+            document.getElementById('clock').innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
         }
 
-        // Fungsi untuk menyerlahkan waktu solat semasa
-        function updatePrayerHighlight(now) {
-            if (!prayerTimes.subuh) return; // jika data belum dimuat
-            
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            
-            // Reset semua highlight
-            document.querySelectorAll('.prayer-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Semak waktu solat semasa
-            let currentPrayer = null;
-            
-            if (
-                (currentHour < prayerTimes.subuh.hour) || 
-                (currentHour === prayerTimes.subuh.hour && currentMinute < prayerTimes.subuh.minute)
-            ) {
-                currentPrayer = 'isyak'; // masih malam, menuju subuh
-            } else if (
-                (currentHour < prayerTimes.zohor.hour) || 
-                (currentHour === prayerTimes.zohor.hour && currentMinute < prayerTimes.zohor.minute)
-            ) {
-                currentPrayer = 'subuh';
-            } else if (
-                (currentHour < prayerTimes.asar.hour) || 
-                (currentHour === prayerTimes.asar.hour && currentMinute < prayerTimes.asar.minute)
-            ) {
-                currentPrayer = 'zohor';
-            } else if (
-                (currentHour < prayerTimes.maghrib.hour) || 
-                (currentHour === prayerTimes.maghrib.hour && currentMinute < prayerTimes.maghrib.minute)
-            ) {
-                currentPrayer = 'asar';
-            } else if (
-                (currentHour < prayerTimes.isyak.hour) || 
-                (currentHour === prayerTimes.isyak.hour && currentMinute < prayerTimes.isyak.minute)
-            ) {
-                currentPrayer = 'maghrib';
-            } else {
-                currentPrayer = 'isyak';
-            }
-            
-            // Highlight waktu solat semasa
-            const currentPrayerElement = document.getElementById(currentPrayer);
-            if (currentPrayerElement) {
-                currentPrayerElement.classList.add('active');
-            }
-        }
-
-        // Fungsi untuk mengira masa menuju waktu solat seterusnya
-        function updateCountdown(now) {
-            if (!prayerTimes.subuh) return; // jika data belum dimuat
-            
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            const currentSecond = now.getSeconds();
-            
-            let nextPrayer = '';
-            let nextPrayerTime = null;
-            
-            // Tentukan waktu solat seterusnya
-            if (
-                (currentHour < prayerTimes.subuh.hour) || 
-                (currentHour === prayerTimes.subuh.hour && currentMinute < prayerTimes.subuh.minute)
-            ) {
-                nextPrayer = 'Subuh';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setHours(prayerTimes.subuh.hour, prayerTimes.subuh.minute, 0);
-            } else if (
-                (currentHour < prayerTimes.zohor.hour) || 
-                (currentHour === prayerTimes.zohor.hour && currentMinute < prayerTimes.zohor.minute)
-            ) {
-                nextPrayer = 'Zohor';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setHours(prayerTimes.zohor.hour, prayerTimes.zohor.minute, 0);
-            } else if (
-                (currentHour < prayerTimes.asar.hour) || 
-                (currentHour === prayerTimes.asar.hour && currentMinute < prayerTimes.asar.minute)
-            ) {
-                nextPrayer = 'Asar';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setHours(prayerTimes.asar.hour, prayerTimes.asar.minute, 0);
-            } else if (
-                (currentHour < prayerTimes.maghrib.hour) || 
-                (currentHour === prayerTimes.maghrib.hour && currentMinute < prayerTimes.maghrib.minute)
-            ) {
-                nextPrayer = 'Maghrib';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setHours(prayerTimes.maghrib.hour, prayerTimes.maghrib.minute, 0);
-            } else if (
-                (currentHour < prayerTimes.isyak.hour) || 
-                (currentHour === prayerTimes.isyak.hour && currentMinute < prayerTimes.isyak.minute)
-            ) {
-                nextPrayer = 'Isyak';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setHours(prayerTimes.isyak.hour, prayerTimes.isyak.minute, 0);
-            } else {
-                nextPrayer = 'Subuh';
-                nextPrayerTime = new Date(now);
-                nextPrayerTime.setDate(nextPrayerTime.getDate() + 1); // esok
-                nextPrayerTime.setHours(prayerTimes.subuh.hour, prayerTimes.subuh.minute, 0);
-            }
-            
-            // Kira beza masa
-            let timeDiff = nextPrayerTime - now;
-            
-            // Tukar kepada jam:minit:saat
-            let hours = Math.floor(timeDiff / (1000 * 60 * 60));
-            timeDiff -= hours * (1000 * 60 * 60);
-            
-            let mins = Math.floor(timeDiff / (1000 * 60));
-            timeDiff -= mins * (1000 * 60);
-            
-            let secs = Math.floor(timeDiff / 1000);
-            
-            // Format dan paparkan masa
-            document.getElementById('countdown').textContent = 
-                `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            document.getElementById('next-prayer').textContent = nextPrayer;
-        }
-
-        // Muat data waktu solat apabila halaman dimuat
-        document.addEventListener('DOMContentLoaded', fetchPrayerTimes);
-
-        // Kemas kini jam setiap saat
-        setInterval(updateClock, 1000);
-        
-        // Muat semula data waktu solat pada jam 12 malam setiap hari
-        setInterval(() => {
+        // Update dates (Gregorian and Hijri)
+        function updateDates() {
             const now = new Date();
-            if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-                fetchPrayerTimes();
+            
+            // Gregorian date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const gregorianDate = now.toLocaleDateString('ms-MY', options);
+            document.getElementById('gregorian-date').innerText = gregorianDate;
+            
+            // For Hijri date, we'll use a more accurate calculation
+            fetchHijriDate();
+        }
+
+        // Fetch Hijri date from API
+        function fetchHijriDate() {
+            const apiUrl = 'https://api.aladhan.com/v1/gToH';
+            const now = new Date();
+            const formattedDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+            
+            fetch(`${apiUrl}?date=${formattedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200) {
+                        const hijri = data.data.hijri;
+                        const hijriDate = `${hijri.day} ${hijri.month.en} ${hijri.year}`;
+                        document.getElementById('hijri-date').innerText = hijriDate;
+                    } else {
+                        // Fallback if API fails
+                        document.getElementById('hijri-date').innerText = "28 Shawwal 1446";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching Hijri date:', error);
+                    // Fallback
+                    document.getElementById('hijri-date').innerText = "28 Shawwal 1446";
+                });
+        }
+
+        // Fetch prayer times from JAKIM API
+        function fetchPrayerTimes() {
+            // Use the JAKIM API endpoint for Kota Setar, Kedah (KDH01)
+            const jakim_api_url = 'https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=KDH01';
+            
+            fetch(jakim_api_url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.prayerTime && data.prayerTime.length > 0) {
+                        // Extract times from JAKIM response
+                        const times = data.prayerTime[0];
+                        
+                        prayerTimes = {
+                            'imsak': times.imsak,
+                            'subuh': times.fajr,
+                            'syuruk': times.syuruk,
+                            'zohor': times.dhuhr,
+                            'asar': times.asr,
+                            'maghrib': times.maghrib,
+                            'isyak': times.isha
+                        };
+                        
+                        // Update UI with fetched prayer times
+                        updatePrayerTimesUI();
+                    } else {
+                        // Fallback to hardcoded times if API fails
+                        useFallbackPrayerTimes();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching prayer times:', error);
+                    // Use fallback times if fetch fails
+                    useFallbackPrayerTimes();
+                });
+        }
+        
+        // Update prayer times in UI with 12-hour format
+        function updatePrayerTimesUI() {
+            document.getElementById('imsak-time').innerText = convertTo12Hour(prayerTimes.imsak);
+            document.getElementById('subuh-time').innerText = convertTo12Hour(prayerTimes.subuh);
+            document.getElementById('syuruk-time').innerText = convertTo12Hour(prayerTimes.syuruk);
+            document.getElementById('zohor-time').innerText = convertTo12Hour(prayerTimes.zohor);
+            document.getElementById('asar-time').innerText = convertTo12Hour(prayerTimes.asar);
+            document.getElementById('maghrib-time').innerText = convertTo12Hour(prayerTimes.maghrib);
+            document.getElementById('isyak-time').innerText = convertTo12Hour(prayerTimes.isyak);
+        }
+        
+        // Fallback prayer times if API fails
+        function useFallbackPrayerTimes() {
+            prayerTimes = {
+                'imsak': '05:35',
+                'subuh': '05:45',
+                'syuruk': '07:05',
+                'zohor': '13:15',
+                'asar': '16:30',
+                'maghrib': '19:26',
+                'isyak': '20:40'
+            };
+            
+            updatePrayerTimesUI();
+        }
+
+        // Check if it's prayer time
+        function checkPrayerTime() {
+            const now = new Date();
+            const currentTimeHours = now.getHours().toString().padStart(2, '0');
+            const currentTimeMinutes = now.getMinutes().toString().padStart(2, '0');
+            const currentTime = `${currentTimeHours}:${currentTimeMinutes}`;
+            
+            // Check each prayer time
+            for (const prayer in prayerTimes) {
+                if (currentTime === prayerTimes[prayer]) {
+                    showPrayerNotification(prayer);
+                    return;
+                }
             }
-        }, 1000);
+            
+            // Check if we should hide notification
+            if (showingNotification) {
+                const notificationTime = new Date(now);
+                notificationTime.setMinutes(notificationTime.getMinutes() - 10);
+                const notificationTimeStr = notificationTime.getHours().toString().padStart(2, '0') + ':' + 
+                                           notificationTime.getMinutes().toString().padStart(2, '0');
+                
+                // Hide after 10 minutes
+                if (currentTime > notificationTimeStr) {
+                    hideNotification();
+                }
+            }
+        }
+
+        // Show prayer notification
+        function showPrayerNotification(prayer) {
+            if (prayer === 'imsak' || prayer === 'syuruk') return; // Skip these
+            
+            currentPrayer = prayer;
+            showingNotification = true;
+            
+            // Set prayer name in proper Malay
+            let prayerNameMalay = prayer;
+            switch(prayer) {
+                case 'subuh': prayerNameMalay = 'SUBUH'; break;
+                case 'zohor': prayerNameMalay = 'ZOHOR'; break;
+                case 'asar': prayerNameMalay = 'ASAR'; break;
+                case 'maghrib': prayerNameMalay = 'MAGHRIB'; break;
+                case 'isyak': prayerNameMalay = 'ISYAK'; break;
+            }
+            
+            document.getElementById('prayer-name').innerText = prayerNameMalay;
+            document.getElementById('iqamah-title').innerText = `IQAMAH ${prayerNameMalay}`;
+            
+            // Calculate iqamah time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + iqamahTimes[prayer]);
+            
+            // Convert to 12-hour format
+            let hours = now.getHours();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            
+            const iqamahTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${ampm}`;
+            
+            document.getElementById('iqamah-time').innerText = iqamahTime;
+            document.getElementById('notification').classList.add('active');
+        }
+
+        // Hide notification
+        function hideNotification() {
+            showingNotification = false;
+            document.getElementById('notification').classList.remove('active');
+        }
+        
+        // Set Eid countdown
+        function setEidCountdown() {
+            const now = new Date();
+            const daysUntilEid = Math.ceil((eidDate - now) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntilEid > 0) {
+                eidCountdown = true;
+                document.getElementById('countdown-message').innerText = `  `;
+            }
+        }
     </script>
 </body>
 </html>
