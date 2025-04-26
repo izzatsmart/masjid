@@ -108,7 +108,7 @@
         #current-prayer {
             font-size: 36px;
             margin-bottom: 30px;
-            color: #4CFF4C;
+            color: #4CFF4C; /* Bright green color as shown in the image */
         }
         
         #prayer-name {
@@ -308,6 +308,7 @@
             'isyak': 10
         };
         let showingNotification = false;
+        let notificationTimer = null;
         let eidCountdown = false;
         let eidDate = new Date('2025-04-30'); // Example date for Eid
 
@@ -319,7 +320,7 @@
             
             // Set intervals
             setInterval(updateClock, 1000);
-            setInterval(checkPrayerTime, 30000);
+            setInterval(checkPrayerTime, 10000); // Check every 10 seconds to be more precise
             setInterval(updateNextPrayerCountdown, 1000);
             
             // Initial check
@@ -465,35 +466,28 @@
             findNextPrayer();
         }
 
-        // Check if it's prayer time
+        // Check if it's prayer time - improved with more precise timing
         function checkPrayerTime() {
             const now = new Date();
-            const currentTimeHours = now.getHours().toString().padStart(2, '0');
-            const currentTimeMinutes = now.getMinutes().toString().padStart(2, '0');
-            const currentTime = `${currentTimeHours}:${currentTimeMinutes}`;
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
             
             // Check each prayer time
-            for (const prayer in prayerTimes) {
-                if (currentTime === prayerTimes[prayer]) {
-                    showPrayerNotification(prayer);
-                    return;
+            const prayersToCheck = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
+            
+            for (const prayer of prayersToCheck) {
+                if (prayerTimes[prayer]) {
+                    const [hours, minutes] = prayerTimes[prayer].split(':').map(Number);
+                    
+                    // Check if current time matches prayer time
+                    if (currentHour === hours && currentMinute === minutes) {
+                        showPrayerNotification(prayer);
+                        return;
+                    }
                 }
             }
             
-            // Check if we should hide notification
-            if (showingNotification) {
-                const notificationTime = new Date(now);
-                notificationTime.setMinutes(notificationTime.getMinutes() - 10);
-                const notificationTimeStr = notificationTime.getHours().toString().padStart(2, '0') + ':' + 
-                                           notificationTime.getMinutes().toString().padStart(2, '0');
-                
-                // Hide after 10 minutes
-                if (currentTime > notificationTimeStr) {
-                    hideNotification();
-                }
-            }
-            
-            // Find next prayer time
+            // Find next prayer time (even if notification is showing)
             findNextPrayer();
         }
 
@@ -502,8 +496,8 @@
             const now = new Date();
             const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes since midnight
             
-            // Prayer times to check (exclude imsak)
-            const prayersToCheck = ['subuh', 'syuruk', 'zohor', 'asar', 'maghrib', 'isyak'];
+            // Prayer times to check (exclude imsak and syuruk)
+            const prayersToCheck = ['subuh', 'zohor', 'asar', 'maghrib', 'isyak'];
             let nextPrayerTime = 24 * 60; // Default to end of day
             let nextPrayerName = 'subuh'; // Default to Subuh (for next day)
             
@@ -584,7 +578,8 @@
 
         // Show prayer notification
         function showPrayerNotification(prayer) {
-            if (prayer === 'imsak' || prayer === 'syuruk') return; // Skip these
+            // Skip prayers that don't require notifications
+            if (prayer === 'imsak' || prayer === 'syuruk') return;
             
             currentPrayer = prayer;
             showingNotification = true;
@@ -617,6 +612,15 @@
             document.getElementById('iqamah-time').innerText = iqamahTime;
             document.getElementById('notification').classList.add('active');
             
+            // Set a timer to hide the notification after 5 minutes (300000 ms)
+            if (notificationTimer) {
+                clearTimeout(notificationTimer);
+            }
+            
+            notificationTimer = setTimeout(() => {
+                hideNotification();
+            }, 300000); // 5 minutes
+            
             // After notification, find the next prayer
             findNextPrayer();
         }
@@ -625,6 +629,11 @@
         function hideNotification() {
             showingNotification = false;
             document.getElementById('notification').classList.remove('active');
+            
+            if (notificationTimer) {
+                clearTimeout(notificationTimer);
+                notificationTimer = null;
+            }
         }
         
         // Set Eid countdown
@@ -634,7 +643,7 @@
             
             if (daysUntilEid > 0) {
                 eidCountdown = true;
-                document.getElementById('countdown-message').innerText = `  `;
+                document.getElementById('countdown-message').innerText = `  `; // Empty message as requested
             }
         }
     </script>
